@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /** Persistence adapter, separate from the BCE Control. */
 public interface IDPCategoryRepository extends JpaRepository<IDPCategory, Long> {
     List<IDPCategory> findAllByOrderByNameAsc();
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

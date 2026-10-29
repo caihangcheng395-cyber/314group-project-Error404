@@ -61,3 +61,19 @@ h2 { margin: 0; font-size: 29px; }
 .modal-footnote { font-size: 11px; }
 @media (max-width: 950px) { .card-grid { grid-template-columns: repeat(2, 1fr); } .heading-tag { display: none; } }
 @media (max-width: 650px) { .container { padding: 40px 18px 60px; } .metrics, .card-grid { grid-template-columns: 1fr; } .metrics { gap: 10px; margin: 32px 0 48px; } .section-topline { align-items: stretch; flex-direction: column; } .search-box { min-width: 0; } .topbar { padding: 0 18px; } .status-pill { display: none; } .site-footer { flex-direction: column; } }
+
+/* User Story #41: edit-category form */
+.notice.success { color: #2d7046; border-color: #a5d7b6; background: #effaf1; margin-bottom: 20px; }
+.edit-modal { width: min(540px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; }
+.edit-subtitle { color: #7a8b83; font-size: 13px; margin: 0 0 24px; }
+.form-field { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; color: #52665c; font-size: 13px; font-weight: 700; }
+.form-field input, .form-field textarea { width: 100%; padding: 12px 14px; border: 1px solid #d9e5dd; border-radius: 9px; background: white; color: #172839; font: inherit; }
+.form-field input:focus, .form-field textarea:focus { outline: 2px solid #9ccbad; outline-offset: 1px; }
+.form-field textarea { resize: vertical; }
+.toggle-row { display: flex; align-items: center; gap: 10px; margin: 6px 0 20px; font-size: 13px; color: #52665c; }
+.toggle-row input { width: 18px; height: 18px; accent-color: #427e58; }
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+.primary-button, .secondary-button { border-radius: 9px; border: 1px solid #427e58; padding: 11px 17px; font-size: 13px; font-weight: 700; }
+.primary-button { background: #427e58; color: white; }
+.secondary-button { background: white; color: #427e58; }
+.primary-button:disabled, .secondary-button:disabled { opacity: .55; cursor: not-allowed; }

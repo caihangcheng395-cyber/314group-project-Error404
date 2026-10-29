@@ -16,6 +16,16 @@ Returns HTTP 200 and an array of objects:
 ### GET /api/categories/{categoryId}
 Returns HTTP 200 with one category object, or HTTP 404 when missing.
 
+### PUT /api/categories/{categoryId} — User Story #41
+
+Updates a category. Request body:
+
+```json
+{ "name": "Master Bedroom", "description": "Restful interiors", "active": true }
+```
+
+Returns HTTP 200 with updated `IDPCategoryResponse`, HTTP 400 for invalid input, HTTP 404 for unknown ID, or HTTP 409 for duplicate name. **Development only until server-side platform-manager authorization is implemented.** See `docs/user-story-41.md`.
+
 ## Proposed routes — NOT implemented
 
 | Owner | Proposed endpoint | Use case |
@@ -30,7 +40,6 @@ Returns HTTP 200 with one category object, or HTTP 404 when missing.
 | Member 4 | POST/DELETE /api/favourites/{projectId} | Save/remove favourite |
 | Member 5 | POST /api/projects/{id}/views | Record view (validate duplicate policy) |
 | Member 5 | GET /api/projects/{id}/metrics | Views and shortlists |
-| Member 6 | PUT /api/categories/{id} | Update category |
 | Member 6 | GET /api/reports/daily?date=YYYY-MM-DD | Generate/view daily report |
 | Member 6 | GET /api/reports/daily/export?date=YYYY-MM-DD | Export report |
 | Member 6 | PATCH /api/designers/{id}/suspension | Suspend IDP account (coordinate with Member 1) |
