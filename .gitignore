@@ -1,0 +1,22 @@
+# macOS / Windows / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+# Backend
+backend/target/
+backend/data/*
+!backend/data/.gitkeep
+backend/*.log
+*.class
+# Local secrets
+.env
+.env.local
+# Logs
+*.log
