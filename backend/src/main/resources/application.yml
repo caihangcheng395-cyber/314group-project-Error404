@@ -1,5 +1,3 @@
-server:
-  port: 8080
 spring:
   application:
     name: csit314-interior-design-platform
@@ -16,3 +14,16 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+  # Keep the existing file-backed H2 setup for local coursework development.
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 12h
+      cookie:
+        http-only: true
+        same-site: lax
+app:
+  demo-login-enabled: ${APP_DEMO_LOGIN_ENABLED:true}
+  demo-seed-enabled: ${APP_DEMO_SEED_ENABLED:true}

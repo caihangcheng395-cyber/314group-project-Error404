@@ -1,34 +1,14 @@
-# Suggested six-person module ownership
+# Team and sprint mapping
 
-This is a proposed allocation, **not** a statement about your teammates' actual progress.
+This records the responsibilities supplied in the conversation, not invented evidence of completed individual work.
 
-| Member | Primary scope | Cross-module dependency |
+| Sprint | Stories | Team |
 |---|---|---|
-| 1 | User registration/login/profile, auth and roles | Shared `User`, logout, suspension |
-| 2 | Interior designer company information | User/Designer identity |
-| 3 | IDP portfolio CRUD and images | Designer, Category |
-| 4 | Customer search, view and favourites | IDP, User |
-| 5 | View count / shortlist count analytics | IDP, Favourite |
-| 6 | Category management, daily report, export, suspension, logout | Category, User, IDP, metrics |
+| 1 | #1–12 User profiles/accounts and admin authentication | Dhanyasri Kanagaraju, Crystal Tan |
+| 2 | #13–29 Company and current/past IDPs | Crystal Tan, Li Shan (assumed ~KiitoZ), Liao Yi Jou |
+| 3 | #30–38 Customer discovery/shortlists and designer interest tracking | Liao Yi Jou, Keith Low |
+| 4 | #39–48 Category management, reporting and manager authentication | Keith Low, Cai Hangcheng |
 
-## Member 6's previously discussed stories
+The latest 48-story list takes precedence over the older starter's different #41–48 wording. Application roles are testing workspaces, not proof that a developer completed the associated story. Multi-role demo accounts let people test the actor workflows in their sprints.
 
-- #41 Update IDP Category
-- #42 View IDP Category (**starter example implemented**)
-- #43 Search IDP Category
-- #44 Generate Daily Report
-- #45 View Daily Report
-- #46 Export Daily Report
-- #47 Suspend IDP Account
-- #48 Log out
-
-**Verify the exact final stories with the group's latest approved list.** Story #47 and #48 require Member 1's shared authentication/role model. Reports require data from Members 3–5.
-
-## Rules for shared ownership
-
-1. Member 1 owns User and authentication contract.
-2. Member 3 owns IDP entity; Member 6 does not redefine it.
-3. Member 6 owns IDPCategory entity and category API; Member 3 references it.
-4. Member 4 owns Favourite events; Member 5 derives shortlist metrics with agreed semantics.
-5. No member changes a shared field/API without a pull request reviewed by affected members.
-6. One person integrates and verifies main branch; all six still own and test their modules.
+Keep one repository, one backend, one frontend, one shared model. Add APIs to the contract, coordinate model changes, use feature branches and reviewed PRs. Preserve actual meeting notes, sprint artifacts, TDD traces and CI/deployment results. This adaptation is one integrated handoff and must not be retrospectively presented as separate members' Scrum or TDD history.
