@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SampleDataInitializer {
     @Bean
+    @org.springframework.core.annotation.Order(0)
     CommandLineRunner seedCategories(IDPCategoryRepository repository) {
         return args -> {
             if (repository.count() > 0) {

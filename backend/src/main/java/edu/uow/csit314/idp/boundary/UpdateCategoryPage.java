@@ -1,8 +1,10 @@
+
 package edu.uow.csit314.idp.boundary;
 
 import edu.uow.csit314.idp.controller.UpdateIDPCategoryController;
 import edu.uow.csit314.idp.dto.IDPCategoryResponse;
 import edu.uow.csit314.idp.dto.UpdateIDPCategoryRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/categories")
 public class UpdateCategoryPage {
+
     private final UpdateIDPCategoryController controller;
 
     public UpdateCategoryPage(UpdateIDPCategoryController controller) {
@@ -23,7 +26,9 @@ public class UpdateCategoryPage {
     @PutMapping("/{categoryId}")
     public IDPCategoryResponse updateCategory(
             @PathVariable Long categoryId,
-            @Valid @RequestBody UpdateIDPCategoryRequest request) {
-        return controller.updateCategory(categoryId, request);
+            @Valid @RequestBody UpdateIDPCategoryRequest request,
+            HttpSession session) {
+
+        return controller.updateCategory(categoryId, request, session);
     }
 }

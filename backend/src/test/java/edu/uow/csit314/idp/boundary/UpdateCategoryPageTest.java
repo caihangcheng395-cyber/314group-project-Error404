@@ -1,8 +1,15 @@
-package edu.uow.csit314.idp.boundary;
 
-import static org.mockito.ArgumentMatchers.eq;
+package edu.uow.csit314.idp.boundary;
+import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,22 +17,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import edu.uow.csit314.idp.controller.UpdateIDPCategoryController;
 import edu.uow.csit314.idp.dto.IDPCategoryResponse;
 import edu.uow.csit314.idp.dto.UpdateIDPCategoryRequest;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import jakarta.servlet.http.HttpSession;
 
 @WebMvcTest(UpdateCategoryPage.class)
+@AutoConfigureMockMvc(addFilters = false)
 class UpdateCategoryPageTest {
-    @Autowired private MockMvc mvc;
-    @MockBean private UpdateIDPCategoryController controller;
+
+    @Autowired
+    private MockMvc mvc;
+
+    @MockBean
+    private UpdateIDPCategoryController controller;
 
     @Test
     void validUpdateReturnsUpdatedCategory() throws Exception {
-        when(controller.updateCategory(eq(3L), any(UpdateIDPCategoryRequest.class)))
-                .thenReturn(new IDPCategoryResponse(3L, "Master Bedroom", "Updated", false));
+
+        when(controller.updateCategory(
+                eq(3L),
+                any(UpdateIDPCategoryRequest.class),
+                any(HttpSession.class)))
+                .thenReturn(new IDPCategoryResponse(
+                        3L, "Master Bedroom", "Updated", false));
 
         mvc.perform(put("/api/categories/3")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -37,6 +49,7 @@ class UpdateCategoryPageTest {
 
     @Test
     void invalidNameReturns400() throws Exception {
+
         mvc.perform(put("/api/categories/3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"  \",\"description\":\"Updated\",\"active\":true}"))
@@ -45,6 +58,7 @@ class UpdateCategoryPageTest {
 
     @Test
     void missingActiveFlagReturns400() throws Exception {
+
         mvc.perform(put("/api/categories/3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Bedroom\",\"description\":\"Updated\"}"))
