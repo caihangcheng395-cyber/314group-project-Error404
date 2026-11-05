@@ -1,17 +1,30 @@
 package edu.uow.csit314.idp;
-import com.fasterxml.jackson.databind.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.*;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test") @Transactional
 class PlatformIntegrationTest {
  @Autowired MockMvc mvc;@Autowired ObjectMapper json;
@@ -32,4 +45,87 @@ class PlatformIntegrationTest {
  @Test void suspensionAndRestoreDoNotReviveOldSessions()throws Exception{Client admin=login("admin@forma.demo","USER_ADMIN");long id=read(postJson(admin,"/api/accounts",Map.of("email","suspend@forma.test","name","Suspension test","password","SuspendPass123!","defaultRole","CUSTOMER")).andExpect(status().isOk()).andReturn()).get("id").asLong();Client customer=client();postJson(customer,"/api/auth/login",Map.of("email","suspend@forma.test","password","SuspendPass123!")).andExpect(status().isOk());patchJson(admin,"/api/accounts/"+id+"/suspension").andExpect(status().isOk());mvc.perform(get("/api/favourites").session(customer.session())).andExpect(status().isUnauthorized());patchJson(admin,"/api/accounts/"+id+"/suspension").andExpect(status().isOk());mvc.perform(get("/api/favourites").session(customer.session())).andExpect(status().isUnauthorized());postJson(customer,"/api/auth/login",Map.of("email","suspend@forma.test","password","SuspendPass123!")).andExpect(status().isOk());long self=getJson(admin,"/api/auth/me").get("id").asLong();patchJson(admin,"/api/accounts/"+self+"/suspension").andExpect(status().isBadRequest());}
  @Test void designerOwnershipAndLinkedCategoryIntegrityAreEnforced()throws Exception{Client crystal=login("designer@forma.demo","DESIGNER"),yj=login("liao.yijou@forma.demo","DESIGNER"),manager=login("manager@forma.demo","PLATFORM_MANAGER");JsonNode existing=getJson(crystal,"/api/projects?mine=true").get(0);Map<String,Object> p=project(existing.get("companyId").asLong(),existing.get("categoryId").asLong());putJson(yj,"/api/projects/"+existing.get("id").asLong(),p).andExpect(status().isForbidden());long company=read(postJson(yj,"/api/companies",Map.of("name","YJ test studio","email","yjstudio@forma.test")).andExpect(status().isOk()).andReturn()).get("id").asLong();p.put("companyId",company);long id=read(postJson(yj,"/api/projects",p).andExpect(status().isOk()).andReturn()).get("id").asLong();p.put("stage","PAST");putJson(yj,"/api/projects/"+id,p).andExpect(status().isOk()).andExpect(jsonPath("$.progress").value(100));deleteJson(yj,"/api/companies/"+company).andExpect(status().isConflict());long category=existing.get("categoryId").asLong();putJson(manager,"/api/categories/"+category,Map.of("name","Renamed test category","description","Updated","active",true)).andExpect(status().isOk());assertThat(getJson(yj,"/api/projects/"+id).get("category").asText()).isEqualTo("Renamed test category");deleteJson(manager,"/api/categories/"+category).andExpect(status().isConflict());deleteJson(yj,"/api/projects/"+id).andExpect(status().isOk());deleteJson(yj,"/api/companies/"+company).andExpect(status().isOk());}
  @Test void shortlistsViewsAndReportsReadPersistedActivity()throws Exception{Client customer=login("alex@forma.demo","CUSTOMER"),designer=login("designer@forma.demo","DESIGNER"),manager=login("manager@forma.demo","PLATFORM_MANAGER");JsonNode first=getJson(customer,"/api/projects").get(0);long id=first.get("id").asLong();assertThat(getJson(customer,"/api/companies/"+first.get("companyId").asLong()+"/public").get("name").asText()).isEqualTo("Studio North");mvc.perform(get("/api/reports/daily").session(customer.session())).andExpect(status().isForbidden());postJson(customer,"/api/favourites/"+id,Map.of()).andExpect(status().isOk());postJson(customer,"/api/favourites/"+id,Map.of()).andExpect(status().isOk()).andExpect(jsonPath("$.shortlists").value(1));postJson(customer,"/api/projects/"+id+"/views",Map.of()).andExpect(status().isOk()).andExpect(jsonPath("$.views").value(1));assertThat(getJson(customer,"/api/favourites").size()).isEqualTo(1);JsonNode metrics=getJson(designer,"/api/projects/metrics");assertThat(metrics.toString()).contains("\"views\":1");for(String period:List.of("daily","weekly","monthly")){JsonNode report=getJson(manager,"/api/reports/"+period);assertThat(report.get("projectViews").asLong()).isEqualTo(1);assertThat(report.get("shortlistAdds").asLong()).isEqualTo(1);}mvc.perform(get("/api/reports/daily/export").session(manager.session())).andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith("text/csv"));deleteJson(customer,"/api/favourites/"+id).andExpect(status().isOk());assertThat(getJson(customer,"/api/favourites").size()).isZero();postJson(customer,"/api/auth/logout",Map.of()).andExpect(status().isOk());}
+ @Test
+void unusedCategoryCanBeDeleted() throws Exception {
+    Client manager = login(
+        "manager@forma.demo",
+        "PLATFORM_MANAGER"
+    );
+
+    long id = read(
+        postJson(
+            manager,
+            "/api/categories",
+            Map.of(
+                "name", "Temporary Test Category",
+                "description", "Created for deletion testing",
+                "active", true
+            )
+        ).andExpect(status().isOk()).andReturn()
+    ).get("id").asLong();
+
+    deleteJson(manager, "/api/categories/" + id)
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.ok").value(true));
+
+    mvc.perform(
+        get("/api/categories/" + id)
+            .session(manager.session())
+    ).andExpect(status().isNotFound());
+}
+
+@Test
+void searchCategoryMatchesNameAndDescription() throws Exception {
+
+    Client manager = login(
+        "manager@forma.demo",
+        "PLATFORM_MANAGER"
+    );
+
+    // Create a category for testing.
+    postJson(
+        manager,
+        "/api/categories",
+        Map.of(
+            "name", "Q43SearchSunroom2026",
+            "description", "Q43RareCopperTone",
+            "active", true
+        )
+    ).andExpect(status().isOk());
+
+    // Test 1: Search by name, ignoring case.
+    JsonNode byName = getJson(
+        manager,
+        "/api/categories/search?keyword=q43searchSUNROOM2026"
+    );
+
+    assertThat(byName.size()).isEqualTo(1);
+    assertThat(byName.get(0).get("name").asText())
+        .isEqualTo("Q43SearchSunroom2026");
+
+    // Test 2: Search by description.
+    JsonNode byDescription = getJson(
+        manager,
+        "/api/categories/search?keyword=q43RAREcoppertone"
+    );
+
+    assertThat(byDescription.size()).isEqualTo(1);
+
+    // Test 3: No matching category.
+    JsonNode noResults = getJson(
+        manager,
+        "/api/categories/search?keyword=q43nonexistentxyz"
+    );
+
+    assertThat(noResults.size()).isZero();
+
+    // Test 4: Empty keyword returns categories.
+    JsonNode allCategories = getJson(
+        manager,
+        "/api/categories/search?keyword="
+    );
+
+    assertThat(allCategories.size()).isGreaterThan(0);
+}
+
 }

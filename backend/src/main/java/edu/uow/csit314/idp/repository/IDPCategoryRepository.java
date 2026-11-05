@@ -21,5 +21,11 @@ public interface IDPCategoryRepository extends JpaRepository<IDPCategory, Long> 
 
     // Main branch: Check whether a category name already exists.
     boolean existsByNameIgnoreCase(String name);
+
+    // US43: Search categories by name or description (case-insensitive).
+List<IDPCategory> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByNameAsc(
+        String name,
+        String description
+);
 }
 
